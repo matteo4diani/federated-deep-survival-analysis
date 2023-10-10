@@ -8,6 +8,7 @@ import torch
 import auton_survival
 import flwr as fl
 
+
 class DeepCoxPHClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using
     PyTorch."""
@@ -17,7 +18,7 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         model: auton_survival.DeepCoxPH,
         train: dict[str, np.ndarray],
         test: dict[str, np.ndarray],
-        num_examples: dict
+        num_examples: dict,
     ) -> None:
         self.model = model
         self.trainloader = train
@@ -39,10 +40,12 @@ class DeepCoxPHClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        self.model.fit(self.trainloader['features'], 
-                       self.trainloader['times'], 
-                       self.trainloader['events'],
-                       iters=1)
+        self.model.fit(
+            self.trainloader["features"],
+            self.trainloader["times"],
+            self.trainloader["events"],
+            iters=1,
+        )
         return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
     def evaluate(
@@ -51,5 +54,5 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss = self.model.test(self.model, self.testloader)
-        accuracy = metrics.survival_regression_metric('ctd', self.testloader)
+        accuracy = metrics.survival_regression_metric("ctd", self.testloader)
         return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
