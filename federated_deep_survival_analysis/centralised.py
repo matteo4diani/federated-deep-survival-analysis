@@ -1,5 +1,5 @@
 from auton_survival import datasets, preprocessing, metrics
-from auton_survival.models.cph import DeepCoxPH, DeepRecurrentCoxPH
+from auton_survival.models.cph import DeepCoxPH
 import numpy as np
 import pandas as pd
 
@@ -32,16 +32,15 @@ num_feats = [
 features = preprocessing.Preprocessor().fit_transform(features, cat_feats, num_feats)
 
 # Train a Deep Cox Proportional Hazards (DCPH) model
-model: DeepCoxPH = DeepCoxPH()
-print(outcomes.time)
-print(outcomes.event)
+model: DeepCoxPH = DeepCoxPH(layers=[128, 64, 32])
 
-model.fit(features, outcomes.time.values, outcomes.event.values)
+model.fit(features, outcomes.time.values, outcomes.event.values, iters=100)
 
 # Predict risk at specific time horizons.
-times = list(np.linspace(30, 2000, num=100))
+times = list(range(3, 2029))
+
 predictions = model.predict_survival(features, t=times)
 
 ibs = metrics.survival_regression_metric("ibs", outcomes, predictions, times)
+
 print(f"IBS: {ibs}")
-input("Forward...?")
