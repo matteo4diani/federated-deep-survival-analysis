@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "federated-deep-survival-analysis"
+version = "0.1.0"
+description = ""
+authors = ["Matteo Fordiani <matteofordiani@gmail.com>"]
+readme = "README.md"
+packages = [{include = "federated_deep_survival_analysis"}]
+
+[tool.poetry.dependencies]
+python = "~3.10"
+auton-survival = {git = "https://github.com/matteo4diani/auton-survival.git", rev = "fork/mfordiani-auton-survival"}
+flwr = {extras = ["simulation"], version = "^1.5.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
