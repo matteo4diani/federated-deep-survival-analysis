@@ -34,10 +34,12 @@ features = preprocessing.Preprocessor().fit_transform(features, cat_feats, num_f
 # Train a Deep Cox Proportional Hazards (DCPH) model
 model: DeepCoxPH = DeepCoxPH(layers=[128, 64, 32])
 
-model.fit(features, outcomes.time.values, outcomes.event.values, iters=100)
+outcome_times = outcomes.time.values
+
+model.fit(features, outcome_times, outcomes.event.values, iters=100)
 
 # Predict risk at specific time horizons.
-times = list(range(3, 2029))
+times = list(range(min(outcome_times), max(outcome_times)))
 
 predictions = model.predict_survival(features, t=times)
 
