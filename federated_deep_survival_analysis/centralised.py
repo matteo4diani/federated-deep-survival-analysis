@@ -36,10 +36,10 @@ model: DeepCoxPH = DeepCoxPH(layers=[128, 64, 32])
 
 outcome_times = outcomes.time.values
 
-model.fit(features, outcome_times, outcomes.event.values, iters=100)
+model.fit(features, outcome_times, outcomes.event.values, iters=100, patience=5, vsize=0.1)
 
 # Predict risk at specific time horizons.
-times = list(range(min(outcome_times), max(outcome_times)))
+times = list(range(min(outcome_times), max(outcome_times), 100))
 
 predictions = model.predict_survival(features, t=times)
 
