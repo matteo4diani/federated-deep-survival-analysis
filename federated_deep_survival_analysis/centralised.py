@@ -31,18 +31,33 @@ num_feats = [
 # Preprocess (Impute and Scale) the features
 features = preprocessing.Preprocessor().fit_transform(features, cat_feats, num_feats)
 
+from sklearn.model_selection import train_test_split
+
+features_train, features_test, outcomes_train, outcomes_test = train_test_split(
+    features, outcomes, test_size=0.25, random_state=42
+)
+
 # Train a Deep Cox Proportional Hazards (DCPH) model
 model: DeepCoxPH = DeepCoxPH(layers=[128, 64, 32])
 
-outcome_times = outcomes.time.values
+outcomes_train_times = outcomes_train.time.values
 
-model.fit(features, outcome_times, outcomes.event.values, iters=100, patience=5, vsize=0.1)
+model.fit(
+    features_train,
+    outcomes_train_times,
+    outcomes_train.event.values,
+    iters=100,
+    patience=5,
+    vsize=0.1,
+)
 
 # Predict risk at specific time horizons.
-times = list(range(min(outcome_times), max(outcome_times), 100))
+times = list(range(min(outcomes_train_times), max(outcomes_train_times), 100))
 
-predictions = model.predict_survival(features, t=times)
+predictions = model.predict_survival(features_test, t=times)
 
-ibs = metrics.survival_regression_metric("ibs", outcomes, predictions, times)
+ibs = metrics.survival_regression_metric(
+    "ctd", outcomes_test, predictions, times, outcomes_train=outcomes_train
+)
 
 print(f"IBS: {ibs}")
