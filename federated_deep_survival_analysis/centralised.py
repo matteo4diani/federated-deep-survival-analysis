@@ -52,7 +52,7 @@ model.fit(
 )
 
 # Predict risk at specific time horizons.
-times = list(range(min(outcomes_train_times), max(outcomes_train_times), 100))
+times = [365, 365 * 2, 365 * 3, 365 * 4]
 
 predictions = model.predict_survival(features_test, t=times)
 
@@ -60,4 +60,4 @@ ibs = metrics.survival_regression_metric(
     "ctd", outcomes_test, predictions, times, outcomes_train=outcomes_train
 )
 
-print(f"IBS: {ibs}")
+print(f"Concordance Indexes for horizons {times}: {ibs}")
