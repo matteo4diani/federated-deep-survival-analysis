@@ -1,7 +1,11 @@
 from auton_survival import datasets, preprocessing, metrics
+from auton_survival import enable_auton_logger
 from auton_survival.models.cph import DeepCoxPH
 import numpy as np
 import pandas as pd
+import warnings
+
+enable_auton_logger(add_logger=True, capture_warnings=True, log_level="INFO")
 
 # Load the SUPPORT Dataset
 outcomes, features = datasets.load_dataset("SUPPORT")
@@ -52,12 +56,15 @@ model.fit(
 )
 
 # Predict risk at specific time horizons.
-times = [365, 365 * 2, 365 * 3, 365 * 4]
+admissible_times = list(
+    range(min(outcomes_train_times) + 1, max(outcomes_train_times), 30)
+)
+times = [365, 365 * 2, 365 * 4]
 
 predictions = model.predict_survival(features_test, t=times)
 
-ibs = metrics.survival_regression_metric(
+ctd = metrics.survival_regression_metric(
     "ctd", outcomes_test, predictions, times, outcomes_train=outcomes_train
 )
 
-print(f"Concordance Indexes for horizons {times}: {ibs}")
+print(f"C-Index:\n{dict(zip(times, ctd))}")

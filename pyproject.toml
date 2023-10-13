@@ -10,6 +10,10 @@ packages = [{include = "federated_deep_survival_analysis"}]
 python = "~3.10"
 auton-survival = {git = "https://github.com/matteo4diani/auton-survival.git", rev = "fork/mfordiani-auton-survival"}
 flwr = {extras = ["simulation"], version = "^1.5.0"}
+torch = "^1.13"
+torchvision = "^0.14"
+hydra-core = "^1.3.2"
+ray = "2.6.3"
 
 
 [tool.poetry.group.dev.dependencies]
