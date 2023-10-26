@@ -1,19 +1,39 @@
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from loguru import logger
-from dataset import get_dataset
+from federated_deep_survival_analysis.federated_example.dataset import (
+    get_dataset,
+)
 from auton_survival import enable_auton_logger
+import logging
 
 
-@hydra.main(config_path="config", config_name="base", version_base=None)
+def log(obj: any):
+    logger.info("\n{}", obj)
+
+
+@hydra.main(
+    config_path="config",
+    config_name="base",
+    version_base=None,
+)
 def main(config: DictConfig):
-    enable_auton_logger(add_logger=True, capture_warnings=True)
+    enable_auton_logger(
+        add_logger=True, capture_warnings=True
+    )
 
     # 1. Parse config and get experiment output dir
-    logger.info("\n{}", OmegaConf.to_yaml(config))
+    log(OmegaConf.to_yaml(config))
 
     # 2. Prepare dataset
-    trainloaders, validationloaders, testloaders = get_dataset()
+    (
+        train_dataloaders,
+        validation_dataloaders,
+        test_dataloader,
+    ) = get_dataset(
+        num_partitions=config.num_clients,
+        batch_size=config.batch_size,
+    )
 
     # 3. Define clients
 
@@ -22,8 +42,6 @@ def main(config: DictConfig):
     # 5. Start simulation
 
     # 6. Save results
-
-    pass
 
 
 if __name__ == "__main__":

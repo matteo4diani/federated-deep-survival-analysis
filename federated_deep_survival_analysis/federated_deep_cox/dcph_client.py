@@ -11,7 +11,11 @@ import flwr as fl
 
 class DeepCoxPHClient(fl.client.NumPyClient):
     def __init__(
-        self, model: auton_survival.DeepCoxPH, train, test, num_examples
+        self,
+        model: auton_survival.DeepCoxPH,
+        train,
+        test,
+        num_examples,
     ) -> None:
         self.model = model
         self.trainloader = train
