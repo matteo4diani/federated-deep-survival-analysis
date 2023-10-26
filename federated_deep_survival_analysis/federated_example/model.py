@@ -41,9 +41,8 @@ def train(
 
     for _ in range(epochs):
         for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(
-                device
-            )
+            images = images.to(device)
+            labels = labels.to(device)
             loss = criterion(net(images), labels)
             optimizer.zero_grad()
             loss.backward()
@@ -60,9 +59,8 @@ def test(net: nn.Module, testloader, device: str):
 
     for data in testloader:
         images, labels = data
-        images, labels = images.to(device), labels.to(
-            device
-        )
+        images = images.to(device)
+        labels = labels.to(device)
         outputs = net(images)
         loss += criterion(outputs, labels).item()
         _, predicted = torch.max(outputs.data, dim=1)
