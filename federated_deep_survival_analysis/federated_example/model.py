@@ -2,11 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Note the model and functions here defined do not have any FL-specific components.
+
 
 class Net(nn.Module):
+    """A simple CNN suitable for simple vision tasks."""
+
     def __init__(self, num_classes: int) -> None:
         super(Net, self).__init__()
-
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -21,50 +24,41 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
-
         return x
 
 
-def train(
-    net: nn.Module,
-    trainloader,
-    optimizer,
-    epochs,
-    device: str,
-):
-    """Train network on training set"""
-    criterion: torch.nn.CrossEntropyLoss = (
-        torch.nn.CrossEntropyLoss()
-    )
+def train(net, trainloader, optimizer, epochs, device: str):
+    """Train the network on the training set.
+
+    This is a fairly simple training loop for PyTorch.
+    """
+    criterion = torch.nn.CrossEntropyLoss()
     net.train()
     net.to(device)
-
     for _ in range(epochs):
         for images, labels in trainloader:
-            images = images.to(device)
-            labels = labels.to(device)
-            loss = criterion(net(images), labels)
+            images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
+            loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
 
 
-@torch.inference_mode()
-def test(net: nn.Module, testloader, device: str):
-    """Test network on full test set"""
+def test(net, testloader, device: str):
+    """Validate the network on the entire test set.
+
+    and report loss and accuracy.
+    """
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     net.eval()
     net.to(device)
-
-    for data in testloader:
-        images, labels = data
-        images = images.to(device)
-        labels = labels.to(device)
-        outputs = net(images)
-        loss += criterion(outputs, labels).item()
-        _, predicted = torch.max(outputs.data, dim=1)
-        correct += (predicted == labels).sum().item()
-
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = net(images)
+            loss += criterion(outputs, labels).item()
+            _, predicted = torch.max(outputs.data, 1)
+            correct += (predicted == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy

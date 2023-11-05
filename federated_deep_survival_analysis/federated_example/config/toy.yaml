@@ -1,0 +1,8 @@
+---
+
+foo: 123
+bar:
+  bax: [1, 2, 3]
+  more:
+    bla: "hello"
+    blabla: ${foo}

@@ -5,9 +5,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
-enable_auton_logger(
-    add_logger=True, capture_warnings=True, log_level="INFO"
-)
+enable_auton_logger(add_logger=True, capture_warnings=True, log_level="INFO")
 
 # Load the SUPPORT Dataset
 outcomes, features = datasets.load_dataset("SUPPORT")
@@ -53,9 +51,7 @@ from sklearn.model_selection import train_test_split
     features_test,
     outcomes_train,
     outcomes_test,
-) = train_test_split(
-    features, outcomes, test_size=0.25, random_state=42
-)
+) = train_test_split(features, outcomes, test_size=0.25, random_state=42)
 
 # Train a Deep Cox Proportional Hazards (DCPH) model
 model: DeepCoxPH = DeepCoxPH(layers=[128, 64, 32])
