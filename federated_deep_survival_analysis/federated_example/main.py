@@ -13,7 +13,6 @@ from log_config import configure_loguru_logging
 from server import get_on_fit_config, get_evaluate_fn
 
 
-
 from loguru import logger
 import sys
 

@@ -13,7 +13,6 @@ from log_config import configure_loguru_logging
 from server import get_on_fit_config, get_evaluate_fn
 
 
-
 from loguru import logger
 import sys
 
@@ -26,7 +25,7 @@ def main(config: DictConfig):
     logger.info(f"\n{OmegaConf.to_yaml(config)}")
     logger.info(config.bar.more)
     logger.info(config.bar.more.blabla)
-    
-    
+
+
 if __name__ == "__main__":
     main()
