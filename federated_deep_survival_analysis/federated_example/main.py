@@ -3,6 +3,7 @@ from pathlib import Path
 
 import hydra
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
 import flwr as fl
@@ -47,6 +48,11 @@ def main(config: DictConfig):
         on_fit_config_fn=get_on_fit_config(config.config_fit),
         evaluate_fn=get_evaluate_fn(config.num_classes, testloader),
     )
+    
+    strategy = instantiate(
+        config.strategy,
+        evaluate_fn=get_evaluate_fn(config.num_classes, testloader),
+    )
 
     ## 5. Start Simulation
     history = fl.simulation.start_simulation(
@@ -59,6 +65,7 @@ def main(config: DictConfig):
             "num_gpus": 0.0,
         },
     )
+
     ## 6. Save your results
     results_path = Path(save_path) / "results.pkl"
 

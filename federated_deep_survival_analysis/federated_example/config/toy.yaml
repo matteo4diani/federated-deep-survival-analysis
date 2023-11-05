@@ -1,8 +1,46 @@
 ---
 
 foo: 123
+
+env: test
+
 bar:
   bax: [1, 2, 3]
   more:
     bla: "hello"
     blabla: ${foo}
+
+my_func:
+  _target_: toy.function_${env}
+  x: 123
+  y: 321
+
+my_partial_func:
+  _target_: toy.function_${env}
+  _partial_: true
+  x: 777
+
+my_object:
+  _target_: toy.MyClass
+  x: 32
+
+vars:
+  x: 32
+  y: 64
+
+my_composite_object:
+  _target_: toy.MyCompositeClass
+  my_object:
+    _target_: toy.MyClass
+    x: ${vars.x}
+
+my_partial_object:
+  _target_: toy.MyCompositeClass
+  _recursive_: false
+  my_object:
+    _target_: toy.MyClass
+    x: ${vars.x}
+
+defaults:
+  - toy_model: resnet18
+

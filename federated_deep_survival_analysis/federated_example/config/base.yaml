@@ -11,3 +11,11 @@ config_fit:
   lr: 0.01
   momentum: 0.9
   local_epochs: 1
+
+model:
+  _target_: model.Net
+  num_classes: ${num_classes}
+
+defaults:
+  - strategy: fedavg
+  
