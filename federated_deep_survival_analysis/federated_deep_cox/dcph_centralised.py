@@ -1,12 +1,14 @@
 from auton_survival import datasets, preprocessing, metrics
 from auton_survival import enable_auton_logger
 from auton_survival.models.cph import DeepCoxPH
+from loguru import logger
+from federated_deep_survival_analysis.log_config import configure_loguru_logging
 import numpy as np
 import pandas as pd
 import warnings
 
-enable_auton_logger(add_logger=True, capture_warnings=True, log_level="INFO")
-
+enable_auton_logger(add_logger=True, capture_warnings=True, log_level="DEBUG")
+configure_loguru_logging()
 # Load the SUPPORT Dataset
 outcomes, features = datasets.load_dataset("SUPPORT")
 
@@ -87,4 +89,4 @@ ctd = metrics.survival_regression_metric(
     outcomes_train=outcomes_train,
 )
 
-print(f"C-Index:\n{dict(zip(times, ctd))}")
+logger.info(f"C-Index:\n{dict(zip(times, ctd))}")

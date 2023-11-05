@@ -25,3 +25,4 @@ def configure_loguru_logging():
     clear_loggers(None)
     clear_loggers("flwr")
     clear_loggers("ray")
+    clear_loggers("tqdm")
