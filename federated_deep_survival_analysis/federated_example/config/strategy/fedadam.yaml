@@ -15,4 +15,3 @@ initial_parameters:
 on_fit_config_fn:
   _target_: server.get_on_fit_config
   config: ${config_fit}
-  

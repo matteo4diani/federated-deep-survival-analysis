@@ -6,12 +6,13 @@ import torch
 import flwr as fl
 
 from model import Net, train, test
+from hydra.utils import instantiate
 
 
 class FlowerClient(fl.client.NumPyClient):
     """Define a Flower Client."""
 
-    def __init__(self, trainloader, vallodaer, num_classes) -> None:
+    def __init__(self, trainloader, vallodaer, model_config) -> None:
         super().__init__()
 
         # the dataloaders that point to the data associated to this client
@@ -19,7 +20,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.valloader = vallodaer
 
         # a model that is randomly initialised at first
-        self.model = Net(num_classes)
+        self.model = instantiate(model_config)
 
         # figure out if this client has access to GPU support or not
         self.device = torch.device(
@@ -85,7 +86,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(self.valloader), {"accuracy": accuracy}
 
 
-def generate_client_fn(trainloaders, valloaders, num_classes):
+def generate_client_fn(trainloaders, valloaders, model_config):
     """Return a function that can be used by the VirtualClientEngine.
 
     to spawn a FlowerClient with client id `cid`.
@@ -101,7 +102,7 @@ def generate_client_fn(trainloaders, valloaders, num_classes):
         return FlowerClient(
             trainloader=trainloaders[int(cid)],
             vallodaer=valloaders[int(cid)],
-            num_classes=num_classes,
+            model_config=model_config,
         )
 
     # return the function to spawn client

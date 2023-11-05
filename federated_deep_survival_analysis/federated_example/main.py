@@ -10,7 +10,7 @@ import flwr as fl
 
 from dataset import prepare_dataset
 from client import generate_client_fn
-from log_config import configure_loguru_logging
+from federated_deep_survival_analysis.log_config import configure_loguru_logging
 from server import get_on_fit_config, get_evaluate_fn
 
 
@@ -35,23 +35,13 @@ def main(config: DictConfig):
 
     ## 3. Define your clients
     client_fn = generate_client_fn(
-        trainloaders, validationloaders, config.num_classes
+        trainloaders, validationloaders, config.model
     )
 
     ## 4. Define your strategy
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=sys.float_info.min,
-        min_fit_clients=config.num_clients_per_round_fit,
-        fraction_evaluate=sys.float_info.min,
-        min_evaluate_clients=config.num_clients_per_round_eval,
-        min_available_clients=config.num_clients,
-        on_fit_config_fn=get_on_fit_config(config.config_fit),
-        evaluate_fn=get_evaluate_fn(config.num_classes, testloader),
-    )
-    
     strategy = instantiate(
         config.strategy,
-        evaluate_fn=get_evaluate_fn(config.num_classes, testloader),
+        evaluate_fn=get_evaluate_fn(config.model, testloader),
     )
 
     ## 5. Start Simulation

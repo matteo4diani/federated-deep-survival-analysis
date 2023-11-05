@@ -7,6 +7,8 @@ import torch
 
 from model import Net, test
 
+from hydra.utils import instantiate
+
 
 def get_on_fit_config(config: DictConfig):
     """Return function that prepares config to send to clients."""
@@ -30,7 +32,7 @@ def get_on_fit_config(config: DictConfig):
     return fit_config_fn
 
 
-def get_evaluate_fn(num_classes: int, testloader):
+def get_evaluate_fn(model_config, testloader):
     """Define function for global evaluation on the server."""
 
     def evaluate_fn(server_round: int, parameters, config):
@@ -40,7 +42,7 @@ def get_evaluate_fn(num_classes: int, testloader):
         # this function takes these parameters and evaluates the global model
         # on a evaluation / test dataset.
 
-        model = Net(num_classes)
+        model = instantiate(model_config)
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
