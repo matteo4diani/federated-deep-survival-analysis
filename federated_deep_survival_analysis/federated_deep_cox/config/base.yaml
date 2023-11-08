@@ -1,0 +1,29 @@
+---
+
+federated_epochs: 10
+local_epochs: 1
+num_clients: 4
+batch_size: 64
+
+flwr:
+  num_clients_per_round_fit: 4
+  num_clients_per_round_eval: 4
+
+config_fit:
+  federated_epochs: ${federated_epochs}
+  num_clients: ${num_clients}
+  batch_size: ${batch_size}
+  local_epochs: ${local_epochs}
+  lr: 0.01
+  momentum: 0.9
+  patience: 5
+  validation_size: 0.1
+
+defaults:
+  - model: dcph
+  - strategy: fedavg
+
+utils:
+  logs:
+    loguru: true
+    log_level: INFO

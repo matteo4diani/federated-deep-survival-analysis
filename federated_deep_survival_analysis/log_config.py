@@ -3,26 +3,34 @@ import logging
 import sys
 
 
-def configure_loguru_logging():
+def setup_loguru_logging(source_id: str):
+    class InterceptHandler(logging.Handler):
+        def emit(self, record):
+            logger_opt = logger.opt(exception=record.exc_info, depth=6)
+            logger_opt.log(record.levelname, record.getMessage())
+
+    logging.getLogger(source_id).handlers.clear()
+    logging.getLogger(source_id).addHandler(InterceptHandler())
+    logging.getLogger(source_id).propagate = False
+
+
+def configure_loguru_logging(
+    logging_libs=["flwr", "ray", "tqdm"],
+    loguru_libs=["auton_survival"],
+    level="INFO",
+):
     config = {
         "handlers": [
-            {"sink": sys.stdout, "level": "DEBUG"},
+            {"sink": sys.stdout, "level": level},
         ],
     }
 
     logger.configure(**config)
 
-    def clear_loggers(source_id: str):
-        class InterceptHandler(logging.Handler):
-            def emit(self, record):
-                logger_opt = logger.opt(exception=record.exc_info, depth=6)
-                logger_opt.log(record.levelname, record.getMessage())
+    for lib in loguru_libs:
+        logger.enable(lib)
 
-        logging.getLogger(source_id).handlers.clear()
-        logging.getLogger(source_id).addHandler(InterceptHandler())
-        logging.getLogger(source_id).propagate = False
+    setup_loguru_logging(None)
 
-    clear_loggers(None)
-    clear_loggers("flwr")
-    clear_loggers("ray")
-    clear_loggers("tqdm")
+    for lib in logging_libs:
+        setup_loguru_logging(lib)

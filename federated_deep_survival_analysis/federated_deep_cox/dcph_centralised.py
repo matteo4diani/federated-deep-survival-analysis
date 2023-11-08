@@ -5,45 +5,17 @@ from loguru import logger
 from federated_deep_survival_analysis.log_config import configure_loguru_logging
 import numpy as np
 import pandas as pd
-import warnings
 
-enable_auton_logger(add_logger=True, capture_warnings=True, log_level="DEBUG")
-configure_loguru_logging()
+configure_loguru_logging(level="INFO")
 # Load the SUPPORT Dataset
-outcomes, features = datasets.load_dataset("SUPPORT")
+outcomes, features, feature_dict = datasets.load_dataset(
+    "SUPPORT", return_features=True
+)
 
-cat_feats = [
-    "sex",
-    "dzgroup",
-    "dzclass",
-    "income",
-    "race",
-    "ca",
-]
-num_feats = [
-    "age",
-    "num.co",
-    "meanbp",
-    "wblc",
-    "hrt",
-    "resp",
-    "temp",
-    "pafi",
-    "alb",
-    "bili",
-    "crea",
-    "sod",
-    "ph",
-    "glucose",
-    "bun",
-    "urine",
-    "adlp",
-    "adls",
-]
 
 # Preprocess (Impute and Scale) the features
 features = preprocessing.Preprocessor().fit_transform(
-    features, cat_feats, num_feats
+    features, feature_dict["cat_feats"], feature_dict["num_feats"]
 )
 
 from sklearn.model_selection import train_test_split
@@ -88,5 +60,14 @@ ctd = metrics.survival_regression_metric(
     times,
     outcomes_train=outcomes_train,
 )
+boolean_outcomes = list(
+    map(lambda i: True if i == 1 else False, outcomes_test.event.values)
+)
+cic = metrics.concordance_index_censored(
+    boolean_outcomes,
+    outcomes_test.time.values,
+    model.predict_time_independent_risk(features_test).squeeze(),
+)
 
-logger.info(f"C-Index:\n{dict(zip(times, ctd))}")
+logger.info(f"C-Index Censored:\n{cic}")
+logger.info(f"IPCW (time dependent):\n{dict(zip(times, ctd))}")

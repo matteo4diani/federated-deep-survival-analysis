@@ -12,12 +12,12 @@ from hydra.utils import instantiate
 class FlowerClient(fl.client.NumPyClient):
     """Define a Flower Client."""
 
-    def __init__(self, trainloader, vallodaer, model_config) -> None:
+    def __init__(self, trainloader, valloader, model_config) -> None:
         super().__init__()
 
         # the dataloaders that point to the data associated to this client
         self.trainloader = trainloader
-        self.valloader = vallodaer
+        self.valloader = valloader
 
         # a model that is randomly initialised at first
         self.model = instantiate(model_config)
@@ -101,7 +101,7 @@ def generate_client_fn(trainloaders, valloaders, model_config):
         # dataloaders as it's local data.
         return FlowerClient(
             trainloader=trainloaders[int(cid)],
-            vallodaer=valloaders[int(cid)],
+            valloader=valloaders[int(cid)],
             model_config=model_config,
         )
 
