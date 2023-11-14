@@ -33,4 +33,6 @@ def model_to_parameters(model: DeepCoxPH):
 
 
 def prepare_data_from_loader(testloader):
-    return None, None, None
+    features, times, events = testloader
+
+    return features, times, events

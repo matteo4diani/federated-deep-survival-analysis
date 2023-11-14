@@ -12,12 +12,12 @@ outcomes, features, feature_dict = datasets.load_dataset(
     "SUPPORT", return_features=True
 )
 
-
+print(features.head())
 # Preprocess (Impute and Scale) the features
 features = preprocessing.Preprocessor().fit_transform(
     features, feature_dict["cat_feats"], feature_dict["num_feats"]
 )
-
+print(features.head())
 from sklearn.model_selection import train_test_split
 
 (

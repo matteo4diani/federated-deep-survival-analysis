@@ -8,7 +8,7 @@ from omegaconf import DictConfig, OmegaConf
 
 import flwr as fl
 
-from dcph_dataset import prepare_torch_dataset
+from dcph_dataset import prepare_support_dataset
 from dcph_client import get_client_fn, get_model_fn
 from federated_deep_survival_analysis.log_config import configure_loguru_logging
 from dcph_server import get_fit_config_fn, get_evaluate_fn
@@ -29,7 +29,7 @@ def main(config: DictConfig):
     save_path = HydraConfig.get().runtime.output_dir
 
     # 2. Prepare your dataset
-    trainloaders, valloaders, testloader = prepare_torch_dataset(
+    trainloaders, valloaders, testloader = prepare_support_dataset(
         config.num_clients, config.batch_size
     )
 
