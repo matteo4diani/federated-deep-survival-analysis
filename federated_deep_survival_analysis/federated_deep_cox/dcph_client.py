@@ -8,6 +8,7 @@ import torch
 import hydra
 import auton_survival
 import flwr as fl
+from federated_deep_survival_analysis.federated_deep_cox.dcph_dataset import SurvivalDataset
 
 from federated_deep_survival_analysis.federated_deep_cox.dcph_model import test, train
 
@@ -15,11 +16,11 @@ from federated_deep_survival_analysis.federated_deep_cox.dcph_model import test,
 class DeepCoxPHClient(fl.client.NumPyClient):
     def __init__(
         self,
-        trainloader: pd.DataFrame,
-        valloader: pd.DataFrame,
+        trainloader: SurvivalDataset,
+        valloader: SurvivalDataset,
         config: DictConfig,
     ) -> None:
-        model_fn = get_model_fn(config)
+        model_fn = get_model_fn(config, input_dim=trainloader.features.shape[-1])
         self.model = model_fn()
         self.trainloader = trainloader
         self.valloader = valloader
@@ -67,8 +68,11 @@ def get_client_fn(trainloaders, valloaders, config):
     return client_fn
 
 
-def get_model_fn(config):
+def get_model_fn(config, input_dim):
     def model_fn():
-        return DeepCoxPH(layers=config.model.layers)
+        model = DeepCoxPH(layers=config.model.layers)
+        model.init_torch_model(inputdim=input_dim)
+        return model
+        
 
     return model_fn

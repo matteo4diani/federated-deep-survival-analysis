@@ -11,7 +11,7 @@ eta_l: 0.01
 tau: 0.1
 initial_parameters:
   _target_: model.model_to_parameters
-  model: ${model}
+  model: ${model_impl}
 on_fit_config_fn:
   _target_: dcph_server.get_fit_config_fn
   config_fit: ${config_fit}

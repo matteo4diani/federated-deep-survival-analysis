@@ -40,17 +40,12 @@ def get_evaluate_fn(model_fn, testloader):
 
     def evaluate_fn(server_round: int, parameters, config):
         model: DeepCoxPH = model_fn()
-
         params_dict = zip(model.torch_module.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         model.torch_module.load_state_dict(state_dict, strict=True)
-
-        # you can use the `server_round` input argument to determine if this is the
-        # last round. If it's not, then preferably use a global validation set.
-        loss, accuracy = test(model, testloader)
-
-        # Report the loss and any other metric (inside a dictionary). In this case
-        # we report the global test accuracy.
-        return loss, {"accuracy": accuracy}
+       
+        loss, concordance_index = test(model, testloader)
+        
+        return loss, {"concordance_index": concordance_index}
 
     return evaluate_fn

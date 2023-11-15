@@ -1,6 +1,6 @@
 ---
 
-federated_epochs: 10
+federated_epochs: 3
 local_epochs: 1
 num_clients: 4
 batch_size: 64
@@ -16,11 +16,12 @@ config_fit:
   local_epochs: ${local_epochs}
   lr: 0.01
   momentum: 0.9
-  patience: 5
+  patience: 10
   validation_size: 0.1
 
 defaults:
   - model: dcph
+  - model_impl: dcph
   - strategy: fedavg
 
 utils:

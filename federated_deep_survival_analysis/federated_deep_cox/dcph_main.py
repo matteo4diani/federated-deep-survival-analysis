@@ -15,13 +15,12 @@ from dcph_server import get_fit_config_fn, get_evaluate_fn
 
 
 from loguru import logger
-import logging
 import sys
 
 
 @hydra.main(config_path="config", config_name="base", version_base=None)
 def main(config: DictConfig):
-    logger = logging.getLogger()
+    configure_loguru_logging(level="TRACE")
 
     # 1. Parse config & get experiment output dir
     logger.info(f"\n{OmegaConf.to_yaml(config)}")
@@ -44,7 +43,7 @@ def main(config: DictConfig):
     strategy = instantiate(
         config.strategy,
         evaluate_fn=get_evaluate_fn(
-            model_fn=get_model_fn(config), testloader=testloader
+            model_fn=get_model_fn(config, input_dim=testloader.features.shape[-1]), testloader=testloader
         ),
     )
 
