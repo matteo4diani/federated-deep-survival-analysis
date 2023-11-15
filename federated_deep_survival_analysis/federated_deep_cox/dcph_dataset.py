@@ -18,7 +18,7 @@ def get_survival_dataset(df: pd.DataFrame):
 
 
 def get_support(test_size: float = 0.1, random_state: int = 42):
-    """Download MNIST and apply minimal transformation."""
+    """Load and pre-process SUPPORT dataset."""
 
     outcomes, features, feature_dict = datasets.load_dataset(
         "SUPPORT", return_features=True
@@ -50,8 +50,8 @@ def prepare_support_dataset(
     val_ratio: float = 0.1,
     random_state=0,
 ):
-    """Preprocess SUPPORT and generate IID partitions."""
-
+    """Generate random partitions."""
+    #TODO refactor to generate IID partitions
     train_set, test_set = get_support()
 
     train_df = pd.concat([train_set.features, train_set.outcomes], axis=1)

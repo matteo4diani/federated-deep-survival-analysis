@@ -9,6 +9,8 @@ import hydra
 import auton_survival
 import flwr as fl
 
+from federated_deep_survival_analysis.federated_deep_cox.dcph_model import test, train
+
 
 class DeepCoxPHClient(fl.client.NumPyClient):
     def __init__(
@@ -23,16 +25,29 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         self.valloader = valloader
 
     def get_parameters(self, config):
-        pass
+        return [val.cpu().numpy() for _, val in self.model.torch_module.state_dict().items()]
+
 
     def set_parameters(self, parameters):
-        pass
+        params_dict = zip(self.model.torch_module.state_dict().keys(), parameters)
+
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+
+        self.model.torch_module.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        pass
+        self.set_parameters(parameters)
+        
+        train(self.model, self.trainloader, config)
+        
+        return self.get_parameters({}), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
-        pass
+        self.set_parameters(parameters)
+        
+        loss, concordance_index = test(self.model, self.valloader)
+        
+        return float(loss), len(self.valloader), {"concordance_index": concordance_index}
 
 
 def get_client_fn(trainloaders, valloaders, config):

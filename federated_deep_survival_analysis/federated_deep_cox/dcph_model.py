@@ -2,9 +2,28 @@ from auton_survival.models.cph.dcph_utilities import test_step
 from auton_survival import DeepCoxPH
 from auton_survival import metrics
 
+from federated_deep_survival_analysis.federated_deep_cox.dcph_dataset import SurvivalDataset
 
-def train(model, trainloader, epochs):
-    pass
+
+def train(model: DeepCoxPH, trainloader: SurvivalDataset, config):
+    lr = config["lr"]
+    patience = config["patience"]
+    epochs = config["local_epochs"]
+    vsize = config["validation_size"]
+    batch_size = config["batch_size"]
+    
+
+    model.fit(
+        trainloader.features,
+        trainloader.outcomes.time.values,
+        trainloader.outcomes.event.values,
+        iters=epochs,
+        learning_rate=lr,
+        patience=patience,
+        vsize=vsize,
+        batch_size=batch_size,
+        breslow=False,
+    )
 
 
 def test(model: DeepCoxPH, testloader):
