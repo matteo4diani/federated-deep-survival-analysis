@@ -1,9 +1,9 @@
 from collections import namedtuple
 from auton_survival import datasets, preprocessing
-from sklearn.model_selection import train_test_split
+from loguru import logger
+from sklearn.model_selection import train_test_split, StratifiedKFold, StratifiedShuffleSplit
 import pandas as pd
 import numpy as np
-
 
 SurvivalDataset = namedtuple("SurvivalDataset", ["features", "outcomes"])
 
@@ -28,21 +28,18 @@ def get_support(test_size: float = 0.1, random_state: int = 42):
     features = preprocessing.Preprocessor().fit_transform(
         features, feature_dict["cat_feats"], feature_dict["num_feats"]
     )
-
-    (
-        features_train,
-        features_test,
-        outcomes_train,
-        outcomes_test,
-    ) = train_test_split(
-        features, outcomes, test_size=test_size, random_state=random_state
-    )
+    
+    stratified_shuffle_split = StratifiedShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
+    
+    train_index, test_index = next(stratified_shuffle_split.split(features, outcomes.event.values))
+    features_train, features_test = features.iloc[train_index], features.iloc[test_index]
+    outcomes_train, outcomes_test = outcomes.iloc[train_index], outcomes.iloc[test_index]
 
     return (
         SurvivalDataset(features_train, outcomes_train),
         SurvivalDataset(features_test, outcomes_test),
     )
-
+    
 
 def prepare_support_dataset(
     num_partitions: int,
@@ -55,18 +52,26 @@ def prepare_support_dataset(
     train_set, test_set = get_support()
 
     train_df = pd.concat([train_set.features, train_set.outcomes], axis=1)
-    partition_splits = np.array_split(train_df, num_partitions)
+    
+    stratified_shuffle_split = StratifiedKFold(n_splits=num_partitions, random_state=random_state, shuffle=True)
+    partition_splits = stratified_shuffle_split.split(train_set.features, train_set.outcomes.event)
+    
+    logger.info(partition_splits)
 
     train_sets = []
     val_sets = []
 
-    for partition in partition_splits:
+    for (_, partition_index) in partition_splits:        
+        partition_df = train_df.iloc[partition_index]
+        
         train_split, val_split = train_test_split(
-            partition, test_size=val_ratio, random_state=random_state
+            partition_df, test_size=val_ratio, random_state=random_state
         )
 
         train_sets.append(get_survival_dataset(train_split))
 
         val_sets.append(get_survival_dataset(val_split))
+    
+    #partition_splits = np.array_split(train_df, num_partitions)
 
     return train_sets, val_sets, test_set
