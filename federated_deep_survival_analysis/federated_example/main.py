@@ -10,7 +10,9 @@ import flwr as fl
 
 from dataset import prepare_dataset
 from client import generate_client_fn
-from federated_deep_survival_analysis.log_config import configure_loguru_logging
+from federated_deep_survival_analysis.log_config import (
+    configure_loguru_logging,
+)
 from server import get_on_fit_config, get_evaluate_fn
 
 
@@ -18,7 +20,11 @@ from loguru import logger
 import sys
 
 
-@hydra.main(config_path="config", config_name="base", version_base=None)
+@hydra.main(
+    config_path="config",
+    config_name="base",
+    version_base=None,
+)
 def main(config: DictConfig):
     if config.loguru:
         configure_loguru_logging()
@@ -29,7 +35,11 @@ def main(config: DictConfig):
     save_path = HydraConfig.get().runtime.output_dir
 
     ## 2. Prepare your dataset
-    trainloaders, validationloaders, testloader = prepare_dataset(
+    (
+        trainloaders,
+        validationloaders,
+        testloader,
+    ) = prepare_dataset(
         config.num_clients, config.batch_size
     )
 
@@ -41,14 +51,18 @@ def main(config: DictConfig):
     ## 4. Define your strategy
     strategy = instantiate(
         config.strategy,
-        evaluate_fn=get_evaluate_fn(config.model, testloader),
+        evaluate_fn=get_evaluate_fn(
+            config.model, testloader
+        ),
     )
 
     ## 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=config.num_clients,
-        config=fl.server.ServerConfig(num_rounds=config.num_rounds),
+        config=fl.server.ServerConfig(
+            num_rounds=config.num_rounds
+        ),
         strategy=strategy,
         client_resources={
             "num_cpus": 2,
@@ -62,7 +76,9 @@ def main(config: DictConfig):
     results = {"history": history, "anythingelse": "here"}
 
     with open(str(results_path), "wb") as h:
-        pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(
+            results, h, protocol=pickle.HIGHEST_PROTOCOL
+        )
 
 
 if __name__ == "__main__":

@@ -3,7 +3,9 @@
 federated_epochs: 3
 local_epochs: 1
 num_clients: 4
-batch_size: 64
+batch_size: 256
+random_seed: 42
+server_validation_size: 0.2
 
 flwr:
   num_clients_per_round_fit: 4
@@ -14,10 +16,12 @@ config_fit:
   num_clients: ${num_clients}
   batch_size: ${batch_size}
   local_epochs: ${local_epochs}
-  lr: 0.01
+  lr: 0.001
   momentum: 0.9
   patience: 10
-  validation_size: 0.1
+  validation_size: 0.2
+  random_seed: 0
+  weight_decay: 0.01
 
 defaults:
   - model: dcph

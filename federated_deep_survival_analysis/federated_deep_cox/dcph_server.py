@@ -30,6 +30,7 @@ def get_fit_config_fn(config_fit: DictConfig):
             "patience": config_fit.patience,
             "validation_size": config_fit.validation_size,
             "batch_size": config_fit.batch_size,
+            "weight_decay": config_fit.weight_decay,
         }
 
     return fit_config_fn
@@ -40,12 +41,21 @@ def get_evaluate_fn(model_fn, testloader):
 
     def evaluate_fn(server_round: int, parameters, config):
         model: DeepCoxPH = model_fn()
-        params_dict = zip(model.torch_module.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        model.torch_module.load_state_dict(state_dict, strict=True)
-       
+        params_dict = zip(
+            model.torch_module.state_dict().keys(),
+            parameters,
+        )
+        state_dict = OrderedDict(
+            {k: torch.Tensor(v) for k, v in params_dict}
+        )
+        model.torch_module.load_state_dict(
+            state_dict, strict=True
+        )
+
         loss, concordance_index = test(model, testloader)
-        
-        return loss, {"concordance_index": concordance_index}
+
+        return loss, {
+            "concordance_index": concordance_index
+        }
 
     return evaluate_fn

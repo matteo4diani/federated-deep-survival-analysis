@@ -2,7 +2,9 @@ import hydra
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig
 
-from federated_deep_survival_analysis.log_config import configure_loguru_logging
+from federated_deep_survival_analysis.log_config import (
+    configure_loguru_logging,
+)
 
 
 from loguru import logger
@@ -37,7 +39,11 @@ class MyCompositeClass:
         self.obj = obj
 
 
-@hydra.main(config_path="config", config_name="toy", version_base=None)
+@hydra.main(
+    config_path="config",
+    config_name="toy",
+    version_base=None,
+)
 def main(config: DictConfig):
     configure_loguru_logging()
 
@@ -57,10 +63,14 @@ def main(config: DictConfig):
     obj: MyClass = instantiate(config.my_object)
     obj.print_x_squared()
 
-    composite_obj: MyCompositeClass = instantiate(config.my_composite_object)
+    composite_obj: MyCompositeClass = instantiate(
+        config.my_composite_object
+    )
     composite_obj.obj.print_x_squared()
 
-    partial_obj: MyCompositeClass = instantiate(config.my_partial_object)
+    partial_obj: MyCompositeClass = instantiate(
+        config.my_partial_object
+    )
     partial_obj.init_obj(obj)
     partial_obj.obj.print_x_squared()
 

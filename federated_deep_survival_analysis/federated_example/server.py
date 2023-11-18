@@ -44,10 +44,16 @@ def get_evaluate_fn(model_config, testloader):
 
         model = instantiate(model_config)
 
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu"
+        )
 
-        params_dict = zip(model.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        params_dict = zip(
+            model.state_dict().keys(), parameters
+        )
+        state_dict = OrderedDict(
+            {k: torch.Tensor(v) for k, v in params_dict}
+        )
         model.load_state_dict(state_dict, strict=True)
 
         # Here we evaluate the global model on the test set. Recall that in more

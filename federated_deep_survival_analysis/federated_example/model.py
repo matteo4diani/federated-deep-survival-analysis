@@ -37,7 +37,9 @@ def train(net, trainloader, optimizer, epochs, device: str):
     net.to(device)
     for _ in range(epochs):
         for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
+            images, labels = images.to(device), labels.to(
+                device
+            )
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
@@ -55,7 +57,9 @@ def test(net, testloader, device: str):
     net.to(device)
     with torch.no_grad():
         for data in testloader:
-            images, labels = data[0].to(device), data[1].to(device)
+            images, labels = data[0].to(device), data[1].to(
+                device
+            )
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
@@ -67,7 +71,10 @@ def test(net, testloader, device: str):
 def model_to_parameters(model: nn.Module):
     from flwr.common.parameter import ndarrays_to_parameters
 
-    ndarrays = [val.cpu().numpy() for _, val in model.state_dict().items()]
+    ndarrays = [
+        val.cpu().numpy()
+        for _, val in model.state_dict().items()
+    ]
 
     parameters = ndarrays_to_parameters(ndarrays=ndarrays)
 
