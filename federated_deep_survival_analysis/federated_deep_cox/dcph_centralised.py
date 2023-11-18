@@ -1,5 +1,4 @@
 from auton_survival import datasets, preprocessing, metrics
-from auton_survival import enable_auton_logger
 from auton_survival.models.cph import DeepCoxPH
 from loguru import logger
 from federated_deep_survival_analysis.log_config import (
@@ -8,8 +7,9 @@ from federated_deep_survival_analysis.log_config import (
 import numpy as np
 import pandas as pd
 
-configure_loguru_logging(level="INFO")
-# Load the SUPPORT Dataset
+
+configure_loguru_logging(level="DEBUG")
+
 outcomes, features, feature_dict = datasets.load_dataset(
     "SUPPORT", return_features=True
 )
@@ -21,7 +21,6 @@ features = preprocessing.Preprocessor().fit_transform(
     feature_dict["num"],
 )
 
-print(features.head())
 from sklearn.model_selection import train_test_split
 
 (
@@ -46,8 +45,8 @@ model.fit(
     features_train,
     outcomes_train_times,
     outcomes_train.event.values,
-    iters=1000,
-    patience=1000,
+    iters=100,
+    patience=10,
     vsize=0.2,
     breslow=False,
     weight_decay=0.001,

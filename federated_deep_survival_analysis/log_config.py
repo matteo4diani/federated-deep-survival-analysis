@@ -17,14 +17,16 @@ def setup_loguru_logging(source_id: str):
     logging.getLogger(source_id).addHandler(
         InterceptHandler()
     )
+
     logging.getLogger(source_id).propagate = False
 
 
 def configure_loguru_logging(
-    logging_libs=["flwr", "ray", "tqdm"],
-    loguru_libs=["auton_survival"],
+    logging_libs=["flwr", "ray", "tqdm", "auton_survival"],
     level="INFO",
 ):
+    logging.basicConfig(level=level)
+
     config = {
         "handlers": [
             {"sink": sys.stdout, "level": level},
@@ -32,9 +34,6 @@ def configure_loguru_logging(
     }
 
     logger.configure(**config)
-
-    for lib in loguru_libs:
-        logger.enable(lib)
 
     setup_loguru_logging(None)
 
