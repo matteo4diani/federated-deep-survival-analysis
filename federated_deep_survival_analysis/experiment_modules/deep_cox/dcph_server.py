@@ -4,6 +4,10 @@ from omegaconf import DictConfig
 
 import torch
 
+from federated_deep_survival_analysis.utils.tensorboard_writer import (
+    ServerWriter,
+)
+
 from .dcph_model import test
 
 
@@ -28,15 +32,18 @@ def get_fit_config_fn(config_fit: DictConfig):
             "validation_size": config_fit.validation_size,
             "batch_size": config_fit.batch_size,
             "weight_decay": config_fit.weight_decay,
+            "server_round": server_round,
         }
 
     return fit_config_fn
 
 
-def get_evaluate_fn(testloader=None, model_fn=None):
+def get_evaluate_fn(
+    testloader=None, model_fn=None, save_path=None
+):
     """Define function for global evaluation on the server."""
 
-    def evaluate_fn(server_round: int, parameters, config_):
+    def evaluate_fn(server_round: int, parameters, config):
         model: DeepCoxPH = model_fn()
 
         params_dict = zip(
@@ -52,8 +59,16 @@ def get_evaluate_fn(testloader=None, model_fn=None):
 
         loss, concordance_index = test(model, testloader)
 
-        return float(loss), {
-            "eval_cic": float(concordance_index[0])
+        metrics = {
+            "central_loss": float(loss),
+            "central_concordance_index": float(
+                concordance_index[0]
+            ),
         }
+
+        writer = ServerWriter(save_path)
+        writer.write(metrics, server_round)
+
+        return float(loss), metrics
 
     return evaluate_fn

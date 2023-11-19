@@ -5,10 +5,9 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
-from tempfile import TemporaryDirectory
 from flwr.server.utils import tensorboard
-import flwr as fl
 
+import flwr as fl
 
 from federated_deep_survival_analysis.utils.log_config import (
     configure_loguru_logging,
@@ -58,6 +57,7 @@ def main(config: DictConfig):
         trainloaders=trainloaders,
         valloaders=valloaders,
         model_fn=model_fn,
+        save_path=save_path,
     )
 
     strategy = tensorboard(logdir=save_path)(
@@ -73,17 +73,24 @@ def main(config: DictConfig):
             config.evaluate_fn,
             testloader=testloader,
             model_fn=model_fn,
+            save_path=save_path,
         ),
         initial_parameters=call(
             config.init_params, model_fn=model_fn
         ),
         evaluate_metrics_aggregation_fn=call(
             config.metrics_fn,
-            metric_names=["test_cic", "test_loss"],
+            metric_names=[
+                "test_concordance_index",
+                "test_loss",
+            ],
         ),
         fit_metrics_aggregation_fn=call(
             config.metrics_fn,
-            metric_names=["train_cic", "train_loss"],
+            metric_names=[
+                "train_concordance_index",
+                "train_loss",
+            ],
         ),
     )
 

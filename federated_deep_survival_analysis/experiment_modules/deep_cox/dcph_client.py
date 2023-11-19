@@ -2,6 +2,11 @@ from collections import OrderedDict
 import torch
 import flwr as fl
 from auton_survival import DeepCoxPH
+
+from federated_deep_survival_analysis.utils.tensorboard_writer import (
+    ClientWriter,
+)
+
 from .dcph_dataset import (
     SurvivalDataset,
 )
@@ -18,10 +23,14 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         trainloader: SurvivalDataset,
         valloader: SurvivalDataset,
         model_fn,
+        client_id=None,
+        save_path=None,
     ) -> None:
         self.model: DeepCoxPH = model_fn()
         self.trainloader = trainloader
         self.valloader = valloader
+        self.client_id = client_id
+        self.save_path = save_path
 
     def get_parameters(self, config={}):
         return [
@@ -51,13 +60,23 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         loss, concordance_index = test(
             self.model, self.trainloader
         )
+
+        metrics = {
+            "train_loss": float(loss),
+            "train_concordance_index": float(
+                concordance_index[0]
+            ),
+        }
+
+        writer = ClientWriter(
+            self.save_path, self.client_id
+        )
+        writer.write(metrics, config["server_round"])
+
         return (
             self.get_parameters(),
             len(self.trainloader),
-            {
-                "train_loss": float(loss),
-                "train_cic": float(concordance_index[0]),
-            },
+            metrics,
         )
 
     def evaluate(self, parameters, config):
@@ -67,18 +86,25 @@ class DeepCoxPHClient(fl.client.NumPyClient):
             self.model, self.valloader
         )
 
+        metrics = {
+            "test_loss": float(loss),
+            "test_concordance_index": float(
+                concordance_index[0]
+            ),
+        }
+
         return (
             float(loss),
             len(self.valloader),
-            {
-                "test_loss": float(loss),
-                "test_cic": float(concordance_index[0]),
-            },
+            metrics,
         )
 
 
 def get_client_fn(
-    trainloaders=None, valloaders=None, model_fn=None
+    trainloaders=None,
+    valloaders=None,
+    model_fn=None,
+    save_path=None,
 ):
     """Return a function that can be used by the VirtualClientEngine.
 
@@ -90,6 +116,8 @@ def get_client_fn(
             trainloader=trainloaders[int(cid)],
             valloader=valloaders[int(cid)],
             model_fn=model_fn,
+            client_id=int(cid),
+            save_path=save_path,
         )
 
     # return the function to spawn client
