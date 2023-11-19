@@ -87,20 +87,6 @@ def main(config: DictConfig):
         ),
     )
 
-    # strategy = instantiate(
-    #     config.strategy,
-    #     evaluate_fn=call(
-    #         config.evaluate_fn,
-    #         testloader=testloader,
-    #         model_fn=model_fn,
-    #     ),
-    #     initial_parameters=call(
-    #         config.init_params, model_fn=model_fn
-    #     ),
-    #     evaluate_metrics_aggregation_fn=call(config.metrics_fn),
-    #     fit_metrics_aggregation_fn=call(config.metrics_fn),
-    # )
-
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
