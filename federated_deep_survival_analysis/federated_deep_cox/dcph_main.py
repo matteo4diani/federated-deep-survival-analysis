@@ -8,13 +8,10 @@ from omegaconf import DictConfig, OmegaConf
 
 import flwr as fl
 
-from dcph_dataset import prepare_support_dataset
-from dcph_client import get_client_fn, get_model_fn
+
 from federated_deep_survival_analysis.log_config import (
     configure_loguru_logging,
 )
-from dcph_server import get_fit_config_fn, get_evaluate_fn
-
 
 from loguru import logger
 
@@ -25,41 +22,50 @@ from loguru import logger
     version_base=None,
 )
 def main(config: DictConfig):
-    configure_loguru_logging(level="TRACE")
+    if config.utils.logs.loguru:
+        configure_loguru_logging(
+            level=config.utils.logs.log_level
+        )
 
     # 1. Parse config & get experiment output dir
     logger.info(f"\n{OmegaConf.to_yaml(config)}")
 
-    save_path = HydraConfig.get().runtime.output_dir
+    save_path: str = HydraConfig.get().runtime.output_dir
 
     # 2. Prepare your dataset
     (
         trainloaders,
         valloaders,
         testloader,
-    ) = prepare_support_dataset(
-        config.num_clients,
-        config.server_validation_size,
-        config.config_fit.validation_size,
+        input_dim,
+    ) = call(
+        config.dataset_fn,
+        num_partitions=config.num_clients,
+        server_test_size=config.server_validation_size,
+        test_size=config.config_fit.validation_size,
         random_state=config.random_seed,
     )
 
     # 3. Define your clients
-    client_fn = get_client_fn(
+    model_fn = call(config.model_fn, input_dim=input_dim)
+
+    client_fn = call(
+        config.client_fn,
         trainloaders=trainloaders,
         valloaders=valloaders,
-        config=config,
+        model_fn=model_fn,
     )
 
     # 4. Define your strategy
     strategy = instantiate(
         config.strategy,
-        evaluate_fn=get_evaluate_fn(
-            model_fn=get_model_fn(
-                config,
-                input_dim=testloader.features.shape[-1],
-            ),
+        evaluate_fn=call(
+            config.evaluate_fn,
             testloader=testloader,
+            model_fn=model_fn,
+        ),
+        initial_parameters=call(
+            config.init_params, model_fn=model_fn
         ),
     )
 
@@ -80,7 +86,7 @@ def main(config: DictConfig):
     # 6. Save your results
     results_path = Path(save_path) / "results.pkl"
 
-    results = {"history": history, "anythingelse": "here"}
+    results = {"history": history}
 
     with open(str(results_path), "wb") as h:
         pickle.dump(

@@ -13,7 +13,7 @@ SurvivalDataset = namedtuple(
 )
 
 
-def features_outcomes_from_df(df: pd.DataFrame):
+def _features_outcomes_from_df(df: pd.DataFrame):
     outcome_cols = ["event", "time"]
 
     outcomes = df[outcome_cols].copy()
@@ -22,13 +22,13 @@ def features_outcomes_from_df(df: pd.DataFrame):
     return features, outcomes
 
 
-def get_survival_dataset(df: pd.DataFrame):
-    features, outcomes = features_outcomes_from_df(df)
+def _get_survival_dataset(df: pd.DataFrame):
+    features, outcomes = _features_outcomes_from_df(df)
 
     return SurvivalDataset(features, outcomes)
 
 
-def stratified_split(
+def _stratified_split(
     features,
     outcomes,
     test_size,
@@ -38,16 +38,16 @@ def stratified_split(
     args = (features, outcomes, test_size, random_state)
     match type:
         case "simple":
-            return simple_stratified_split(*args)
+            return _simple_stratified_split(*args)
         case "shuffle":
-            return stratified_shuffle_split(*args)
+            return _stratified_shuffle_split(*args)
         case "continuous":
-            return stratified_continuous_split(*args)
+            return _stratified_continuous_split(*args)
         case _:
             raise Exception(f"No split for type {type}")
 
 
-def simple_stratified_split(
+def _simple_stratified_split(
     features, outcomes, test_size, random_state
 ):
     df = pd.concat([features, outcomes], axis=1)
@@ -59,12 +59,12 @@ def simple_stratified_split(
         stratify=outcomes.event.values,
     )
 
-    return get_survival_dataset(
+    return _get_survival_dataset(
         train_set
-    ), get_survival_dataset(val_set)
+    ), _get_survival_dataset(val_set)
 
 
-def stratified_shuffle_split(
+def _stratified_shuffle_split(
     features, outcomes, test_size, random_state
 ):
     stratified_shuffle_split = StratifiedShuffleSplit(
@@ -93,7 +93,7 @@ def stratified_shuffle_split(
     )
 
 
-def stratified_continuous_split(
+def _stratified_continuous_split(
     features, outcomes, test_size, random_state
 ):
     data = pd.concat([features, outcomes], axis=1)
@@ -106,12 +106,12 @@ def stratified_continuous_split(
     )
 
     return (
-        get_survival_dataset(train_df),
-        get_survival_dataset(test_df),
+        _get_survival_dataset(train_df),
+        _get_survival_dataset(test_df),
     )
 
 
-def stratified_partitioning(
+def _stratified_partitioning(
     num_partitions,
     clients_set,
     test_size,
@@ -138,11 +138,11 @@ def stratified_partitioning(
         (
             client_features,
             client_outcomes,
-        ) = features_outcomes_from_df(
+        ) = _features_outcomes_from_df(
             clients_df.iloc[partition_index]
         )
 
-        train_set, val_set = stratified_split(
+        train_set, val_set = _stratified_split(
             client_features,
             client_outcomes,
             test_size=test_size,
@@ -175,7 +175,7 @@ def _get_support(test_size, random_state):
         feature_dict["num"],
     )
 
-    return stratified_split(
+    return _stratified_split(
         features,
         outcomes,
         test_size,
@@ -185,21 +185,23 @@ def _get_support(test_size, random_state):
 
 
 def prepare_support_dataset(
-    num_partitions: int,
-    server_test_size: float,
-    test_size: float,
-    random_state,
+    num_partitions: int = 2,
+    server_test_size: float = 0.1,
+    test_size: float = 0.2,
+    random_state=0,
 ):
     """Generate random partitions."""
     clients_set, test_set = _get_support(
         server_test_size, random_state
     )
 
-    train_sets, val_sets = stratified_partitioning(
+    train_sets, val_sets = _stratified_partitioning(
         num_partitions,
         clients_set,
         test_size,
         random_state,
     )
 
-    return train_sets, val_sets, test_set
+    input_dim = test_set.features.shape[-1]
+
+    return train_sets, val_sets, test_set, input_dim

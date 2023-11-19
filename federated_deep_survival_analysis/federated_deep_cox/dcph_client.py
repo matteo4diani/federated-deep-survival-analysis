@@ -1,6 +1,4 @@
 from collections import OrderedDict
-from auton_survival import DeepCoxPH
-from omegaconf import DictConfig
 import torch
 import flwr as fl
 from federated_deep_survival_analysis.federated_deep_cox.dcph_dataset import (
@@ -18,11 +16,8 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         self,
         trainloader: SurvivalDataset,
         valloader: SurvivalDataset,
-        config: DictConfig,
+        model_fn,
     ) -> None:
-        model_fn = get_model_fn(
-            config, input_dim=trainloader.features.shape[-1]
-        )
         self.model = model_fn()
         self.trainloader = trainloader
         self.valloader = valloader
@@ -72,7 +67,9 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         )
 
 
-def get_client_fn(trainloaders, valloaders, config):
+def get_client_fn(
+    trainloaders=None, valloaders=None, model_fn=None
+):
     """Return a function that can be used by the VirtualClientEngine.
 
     to spawn a FlowerClient with client id `cid`.
@@ -82,20 +79,8 @@ def get_client_fn(trainloaders, valloaders, config):
         return DeepCoxPHClient(
             trainloader=trainloaders[int(cid)],
             valloader=valloaders[int(cid)],
-            config=config,
+            model_fn=model_fn,
         )
 
     # return the function to spawn client
     return client_fn
-
-
-def get_model_fn(config, input_dim):
-    def model_fn():
-        model = DeepCoxPH(
-            layers=config.model.layers,
-            random_seed=config.config_fit.random_seed,
-        )
-        model.init_torch_model(inputdim=input_dim)
-        return model
-
-    return model_fn

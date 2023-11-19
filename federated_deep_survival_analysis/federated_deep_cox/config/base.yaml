@@ -1,17 +1,18 @@
 ---
 
+random_seed: 0
 federated_epochs: 3
 local_epochs: 1
 num_clients: 4
-batch_size: 256
-random_seed: 42
+batch_size: 128
 server_validation_size: 0.2
 
 flwr:
-  num_clients_per_round_fit: 4
-  num_clients_per_round_eval: 4
+  num_clients_per_round_fit: ${num_clients}
+  num_clients_per_round_eval: ${num_clients}
 
 config_fit:
+  random_seed: 0
   federated_epochs: ${federated_epochs}
   num_clients: ${num_clients}
   batch_size: ${batch_size}
@@ -20,13 +21,18 @@ config_fit:
   momentum: 0.9
   patience: 10
   validation_size: 0.2
-  random_seed: 0
-  weight_decay: 0.01
+  weight_decay: 0.1
 
 defaults:
+  - client_fn: dcph
+  - evaluate_fn: dcph
+  - fit_config_fn: dcph
   - model: dcph
-  - model_impl: dcph
+  - model_fn: dcph
+  - init_params: dcph
   - strategy: fedavg
+  - dataset_fn: dcph_support
+  - _self_
 
 utils:
   logs:

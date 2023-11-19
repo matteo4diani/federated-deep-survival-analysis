@@ -6,8 +6,6 @@ from omegaconf import DictConfig
 import torch
 
 from dcph_model import test
-from auton_survival import DeepCoxPH
-from hydra.utils import instantiate
 
 
 def get_fit_config_fn(config_fit: DictConfig):
@@ -36,11 +34,14 @@ def get_fit_config_fn(config_fit: DictConfig):
     return fit_config_fn
 
 
-def get_evaluate_fn(model_fn, testloader):
+def get_evaluate_fn(testloader=None, model_fn=None):
     """Define function for global evaluation on the server."""
 
-    def evaluate_fn(server_round: int, parameters, config):
-        model: DeepCoxPH = model_fn()
+    def evaluate_fn(
+        server_round: int, parameters, config__
+    ):
+        model = model_fn()
+
         params_dict = zip(
             model.torch_module.state_dict().keys(),
             parameters,

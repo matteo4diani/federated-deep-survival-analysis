@@ -1,6 +1,7 @@
 from loguru import logger
 import logging
 import sys
+import warnings
 
 
 def setup_loguru_logging(source_id: str):
@@ -39,3 +40,11 @@ def configure_loguru_logging(
 
     for lib in logging_libs:
         setup_loguru_logging(lib)
+
+    showwarning_ = warnings.showwarning
+
+    def showwarning(message, *args, **kwargs):
+        logger.warning(message)
+        showwarning_(message, *args, **kwargs)
+
+    warnings.showwarning = showwarning

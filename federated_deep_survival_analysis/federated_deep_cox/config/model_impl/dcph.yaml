@@ -1,3 +1,0 @@
----
-__target__: auton_survival.models.cph.DeepCoxPH
-layers: ${model.layers}

@@ -1,0 +1,9 @@
+---
+
+_target_: dcph_model.get_model_fn
+layers: ${model.layers}
+random_seed: ${config_fit.random_seed}
+early_init: ${model.early_init}
+optimizer: ${model.optimizer}
+activation: ${model.activation}
+bias: ${model.bias}

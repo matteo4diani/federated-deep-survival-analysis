@@ -1,4 +1,8 @@
 ---
 
-layers: [64]
-activation: ReLU
+layers: [16, 16]
+early_init: true
+optimizer: Adam
+activation: Tanh
+bias: false
+dropout: 0.2
