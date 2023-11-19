@@ -46,6 +46,7 @@ def main(config: DictConfig):
         server_test_size=config.server_validation_size,
         test_size=config.config_fit.validation_size,
         random_state=config.random_seed,
+        split_type=config.data.split_type,
     )
 
     # 3. Define your clients

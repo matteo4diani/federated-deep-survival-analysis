@@ -11,6 +11,9 @@ flwr:
   num_clients_per_round_fit: ${num_clients}
   num_clients_per_round_eval: ${num_clients}
 
+data:
+  split_type: shuffle
+
 config_fit:
   random_seed: 0
   federated_epochs: ${federated_epochs}

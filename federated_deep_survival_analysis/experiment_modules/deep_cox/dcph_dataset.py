@@ -116,6 +116,7 @@ def _stratified_partitioning(
     clients_set,
     test_size,
     random_state,
+    split_type,
 ):
     stratified_k_split = StratifiedKFold(
         n_splits=num_partitions,
@@ -147,7 +148,7 @@ def _stratified_partitioning(
             client_outcomes,
             test_size=test_size,
             random_state=random_state,
-            type="shuffle",
+            type=split_type,
         )
 
         train_sets.append(train_set)
@@ -157,7 +158,7 @@ def _stratified_partitioning(
     return train_sets, val_sets
 
 
-def _get_support(test_size, random_state):
+def _get_support(test_size, random_state, split_type):
     """Load and pre-process SUPPORT dataset."""
 
     (
@@ -180,7 +181,7 @@ def _get_support(test_size, random_state):
         outcomes,
         test_size,
         random_state,
-        type="shuffle",
+        type=split_type,
     )
 
 
@@ -189,10 +190,11 @@ def prepare_support_dataset(
     server_test_size: float = 0.1,
     test_size: float = 0.2,
     random_state=0,
+    split_type="shuffle",
 ):
     """Generate random partitions."""
     clients_set, test_set = _get_support(
-        server_test_size, random_state
+        server_test_size, random_state, split_type
     )
 
     train_sets, val_sets = _stratified_partitioning(
@@ -200,6 +202,7 @@ def prepare_support_dataset(
         clients_set,
         test_size,
         random_state,
+        split_type,
     )
 
     input_dim = test_set.features.shape[-1]
