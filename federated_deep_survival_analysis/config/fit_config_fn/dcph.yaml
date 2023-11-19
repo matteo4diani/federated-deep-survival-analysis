@@ -1,4 +1,4 @@
 ---
 
-_target_: modules.deep_cox.dcph_server.get_fit_config_fn
+_target_: dcph_server.get_fit_config_fn
 config_fit: ${config_fit}
