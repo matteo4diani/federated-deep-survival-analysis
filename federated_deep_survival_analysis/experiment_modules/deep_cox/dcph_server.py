@@ -5,7 +5,7 @@ from omegaconf import DictConfig
 
 import torch
 
-from dcph_model import test
+from .dcph_model import test
 
 
 def get_fit_config_fn(config_fit: DictConfig):

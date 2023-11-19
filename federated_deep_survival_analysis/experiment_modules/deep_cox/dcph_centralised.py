@@ -1,9 +1,11 @@
 from auton_survival import datasets, preprocessing, metrics
 from auton_survival.models.cph import DeepCoxPH
 from loguru import logger
-from federated_deep_survival_analysis.log_config import (
+
+from federated_deep_survival_analysis.utils.log_config import (
     configure_loguru_logging,
 )
+
 
 configure_loguru_logging(level="DEBUG")
 

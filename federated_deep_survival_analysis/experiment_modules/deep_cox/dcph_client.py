@@ -1,11 +1,11 @@
 from collections import OrderedDict
 import torch
 import flwr as fl
-from dcph_dataset import (
+from .dcph_dataset import (
     SurvivalDataset,
 )
 
-from dcph_model import (
+from .dcph_model import (
     test,
     train,
 )

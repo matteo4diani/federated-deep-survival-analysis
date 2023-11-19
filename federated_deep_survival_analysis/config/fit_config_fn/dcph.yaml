@@ -1,4 +1,4 @@
 ---
 
-_target_: dcph_server.get_fit_config_fn
+_target_: federated_deep_survival_analysis.dcph_server.get_fit_config_fn
 config_fit: ${config_fit}

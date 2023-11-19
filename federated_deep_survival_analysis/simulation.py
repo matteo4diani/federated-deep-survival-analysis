@@ -9,7 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 import flwr as fl
 
 
-from log_config import (
+from federated_deep_survival_analysis.utils.log_config import (
     configure_loguru_logging,
 )
 
@@ -28,7 +28,9 @@ def main(config: DictConfig):
         )
 
     # 1. Parse config & get experiment output dir
-    logger.info(f"\n{OmegaConf.to_yaml(config)}")
+    logger.info(
+        f"\n{OmegaConf.to_yaml(config, resolve=True)}"
+    )
 
     save_path: str = HydraConfig.get().runtime.output_dir
 
