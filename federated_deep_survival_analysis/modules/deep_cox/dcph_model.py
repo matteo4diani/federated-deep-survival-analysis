@@ -4,7 +4,7 @@ from auton_survival.models.cph.dcph_utilities import (
 from auton_survival import DeepCoxPH
 from auton_survival import metrics
 
-from federated_deep_survival_analysis.federated_deep_cox.dcph_dataset import (
+from dcph_dataset import (
     SurvivalDataset,
 )
 

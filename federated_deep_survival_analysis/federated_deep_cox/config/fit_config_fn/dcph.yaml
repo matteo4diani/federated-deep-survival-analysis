@@ -1,4 +1,0 @@
----
-
-_target_: dcph_server.get_fit_config_fn
-config_fit: ${config_fit}

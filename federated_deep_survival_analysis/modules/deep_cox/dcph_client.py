@@ -1,11 +1,11 @@
 from collections import OrderedDict
 import torch
 import flwr as fl
-from federated_deep_survival_analysis.federated_deep_cox.dcph_dataset import (
+from dcph_dataset import (
     SurvivalDataset,
 )
 
-from federated_deep_survival_analysis.federated_deep_cox.dcph_model import (
+from dcph_model import (
     test,
     train,
 )

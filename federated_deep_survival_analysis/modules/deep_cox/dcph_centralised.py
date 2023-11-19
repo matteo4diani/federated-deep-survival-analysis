@@ -4,9 +4,6 @@ from loguru import logger
 from federated_deep_survival_analysis.log_config import (
     configure_loguru_logging,
 )
-import numpy as np
-import pandas as pd
-
 
 configure_loguru_logging(level="DEBUG")
 

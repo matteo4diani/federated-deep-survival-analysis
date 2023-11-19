@@ -9,7 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 import flwr as fl
 
 
-from federated_deep_survival_analysis.log_config import (
+from log_config import (
     configure_loguru_logging,
 )
 

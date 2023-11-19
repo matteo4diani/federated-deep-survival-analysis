@@ -9,9 +9,4 @@ min_available_clients: ${num_clients}
 eta: 0.2
 eta_l: 0.01
 tau: 0.1
-# initial_parameters:
-#   _target_: dcph_model.model_to_parameters
-#   model: ${model_impl}
-on_fit_config_fn:
-  _target_: dcph_server.get_fit_config_fn
-  config_fit: ${config_fit}
+on_fit_config_fn: ${fit_config_fn}
