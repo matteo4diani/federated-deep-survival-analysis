@@ -5,7 +5,8 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
-
+from tempfile import TemporaryDirectory
+from flwr.server.utils import tensorboard
 import flwr as fl
 
 
@@ -59,9 +60,15 @@ def main(config: DictConfig):
         model_fn=model_fn,
     )
 
-    # 4. Define your strategy
-    strategy = instantiate(
-        config.strategy,
+    strategy = tensorboard(logdir=save_path)(
+        fl.server.strategy.FedAvg
+    )(
+        fraction_fit=config.strategy.fraction_fit,
+        fraction_evaluate=config.strategy.fraction_evaluate,
+        min_fit_clients=config.strategy.min_fit_clients,
+        min_evaluate_clients=config.strategy.min_evaluate_clients,
+        min_available_clients=config.strategy.min_available_clients,
+        on_fit_config_fn=call(config.fit_config_fn),
         evaluate_fn=call(
             config.evaluate_fn,
             testloader=testloader,
@@ -70,9 +77,29 @@ def main(config: DictConfig):
         initial_parameters=call(
             config.init_params, model_fn=model_fn
         ),
-        evaluate_metrics_aggregation_fn=call(config.metrics_fn),
-        fit_metrics_aggregation_fn=call(config.metrics_fn),
+        evaluate_metrics_aggregation_fn=call(
+            config.metrics_fn,
+            metric_names=["test_cic", "test_loss"],
+        ),
+        fit_metrics_aggregation_fn=call(
+            config.metrics_fn,
+            metric_names=["train_cic", "train_loss"],
+        ),
     )
+
+    # strategy = instantiate(
+    #     config.strategy,
+    #     evaluate_fn=call(
+    #         config.evaluate_fn,
+    #         testloader=testloader,
+    #         model_fn=model_fn,
+    #     ),
+    #     initial_parameters=call(
+    #         config.init_params, model_fn=model_fn
+    #     ),
+    #     evaluate_metrics_aggregation_fn=call(config.metrics_fn),
+    #     fit_metrics_aggregation_fn=call(config.metrics_fn),
+    # )
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
@@ -92,13 +119,17 @@ def main(config: DictConfig):
     results_path = Path(save_path) / "results.pkl"
 
     results = {
-        "config": OmegaConf.to_container(config, resolve=True),
-        "history": history
+        "config": OmegaConf.to_container(
+            config, resolve=True
+        ),
+        "history": history,
     }
 
     with open(str(results_path), "wb") as results_file:
         pickle.dump(
-            results, results_file, protocol=pickle.HIGHEST_PROTOCOL
+            results,
+            results_file,
+            protocol=pickle.HIGHEST_PROTOCOL,
         )
 
 

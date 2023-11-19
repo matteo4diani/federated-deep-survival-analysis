@@ -36,9 +36,7 @@ def get_fit_config_fn(config_fit: DictConfig):
 def get_evaluate_fn(testloader=None, model_fn=None):
     """Define function for global evaluation on the server."""
 
-    def evaluate_fn(
-        server_round: int, parameters, config_
-    ):
+    def evaluate_fn(server_round: int, parameters, config_):
         model: DeepCoxPH = model_fn()
 
         params_dict = zip(
@@ -54,8 +52,8 @@ def get_evaluate_fn(testloader=None, model_fn=None):
 
         loss, concordance_index = test(model, testloader)
 
-        return loss, {
-            "concordance_index": concordance_index[0]
+        return float(loss), {
+            "eval_cic": float(concordance_index[0])
         }
 
     return evaluate_fn

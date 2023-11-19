@@ -47,14 +47,17 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         train(self.model, self.trainloader, config)
-        
+
         loss, concordance_index = test(
             self.model, self.trainloader
         )
         return (
             self.get_parameters(),
             len(self.trainloader),
-            {"loss": loss, "concordance_index": concordance_index[0] },
+            {
+                "train_loss": float(loss),
+                "train_cic": float(concordance_index[0]),
+            },
         )
 
     def evaluate(self, parameters, config):
@@ -67,7 +70,10 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         return (
             float(loss),
             len(self.valloader),
-            {"loss": loss, "concordance_index": concordance_index[0]},
+            {
+                "test_loss": float(loss),
+                "test_cic": float(concordance_index[0]),
+            },
         )
 
 
