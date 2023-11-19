@@ -1,6 +1,5 @@
 from collections import OrderedDict
-
-
+from auton_survival import DeepCoxPH
 from omegaconf import DictConfig
 
 import torch
@@ -38,9 +37,9 @@ def get_evaluate_fn(testloader=None, model_fn=None):
     """Define function for global evaluation on the server."""
 
     def evaluate_fn(
-        server_round: int, parameters, config__
+        server_round: int, parameters, config_
     ):
-        model = model_fn()
+        model: DeepCoxPH = model_fn()
 
         params_dict = zip(
             model.torch_module.state_dict().keys(),
@@ -56,7 +55,7 @@ def get_evaluate_fn(testloader=None, model_fn=None):
         loss, concordance_index = test(model, testloader)
 
         return loss, {
-            "concordance_index": concordance_index
+            "concordance_index": concordance_index[0]
         }
 
     return evaluate_fn

@@ -70,6 +70,8 @@ def main(config: DictConfig):
         initial_parameters=call(
             config.init_params, model_fn=model_fn
         ),
+        evaluate_metrics_aggregation_fn=call(config.metrics_fn),
+        fit_metrics_aggregation_fn=call(config.metrics_fn),
     )
 
     # 5. Start Simulation
@@ -89,11 +91,14 @@ def main(config: DictConfig):
     # 6. Save your results
     results_path = Path(save_path) / "results.pkl"
 
-    results = {"history": history}
+    results = {
+        "config": OmegaConf.to_container(config, resolve=True),
+        "history": history
+    }
 
-    with open(str(results_path), "wb") as h:
+    with open(str(results_path), "wb") as results_file:
         pickle.dump(
-            results, h, protocol=pickle.HIGHEST_PROTOCOL
+            results, results_file, protocol=pickle.HIGHEST_PROTOCOL
         )
 
 

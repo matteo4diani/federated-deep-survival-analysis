@@ -35,6 +35,7 @@ defaults:
   - init_params: dcph
   - strategy: fedavg
   - dataset_fn: dcph_support
+  - metrics_fn: weighted_average
   - _self_
 
 utils:

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import torch
 import flwr as fl
+from auton_survival import DeepCoxPH
 from .dcph_dataset import (
     SurvivalDataset,
 )
@@ -18,11 +19,11 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         valloader: SurvivalDataset,
         model_fn,
     ) -> None:
-        self.model = model_fn()
+        self.model: DeepCoxPH = model_fn()
         self.trainloader = trainloader
         self.valloader = valloader
 
-    def get_parameters(self, config):
+    def get_parameters(self, config={}):
         return [
             val.cpu().numpy()
             for _, val in self.model.torch_module.state_dict().items()
@@ -46,11 +47,14 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         train(self.model, self.trainloader, config)
-
+        
+        loss, concordance_index = test(
+            self.model, self.trainloader
+        )
         return (
-            self.get_parameters({}),
+            self.get_parameters(),
             len(self.trainloader),
-            {},
+            {"loss": loss, "concordance_index": concordance_index[0] },
         )
 
     def evaluate(self, parameters, config):
@@ -63,7 +67,7 @@ class DeepCoxPHClient(fl.client.NumPyClient):
         return (
             float(loss),
             len(self.valloader),
-            {"concordance_index": concordance_index},
+            {"loss": loss, "concordance_index": concordance_index[0]},
         )
 
 
